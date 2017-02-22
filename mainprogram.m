@@ -9,10 +9,10 @@
 clear ; close all; clc
 
 %% =========== Part 1: CHARGEMENT ET VISUALISATION DES DONNEES =============
-%  Dans ce partie, on charge la donn®¶e MNIST de http://yann.lecun.com/exdb/mnist/
-%  gr?ce ®§ les deux fonctions: loadMNISTImages et loadMNISTLabels 
-%  pour simplifier et aplliquer dans notre algorithme, on note X et Y correspondant ®§ image et label 
-%  afin de les visualiser, on choisit 100 ®¶chantillons al®¶atoires
+%  Dans ce partie, on charge la donn√©e MNIST de http://yann.lecun.com/exdb/mnist/
+%  gr?ce √† les deux fonctions: loadMNISTImages et loadMNISTLabels 
+%  pour simplifier et aplliquer dans notre algorithme, on note X et Y correspondant √† image et label 
+%  afin de les visualiser, on choisit 100 √©chantillons al√©atoires
 %
 
 
@@ -30,33 +30,62 @@ labels = loadMNISTLabels('train-labels.idx1-ubyte');
 Y = labels;
 
 
-% On choisit 100 ®¶chantillon al®¶atoire
+% On choisit N √©chantillon al√©atoire
+N = 100;
 sel = randperm(size(X, 1));
-sel = sel(1:100);
-
+sel = sel(1:N);
 displayData(X(sel, :));
 
+x = X(sel, :);
+y = Y(sel,:);
 fprintf('Program paused. Press enter to continue.\n');
 pause;
 
-
+%DETERMITER NOBRE DE VALEURS UNLABELED!
+NL = 20;
+for i  = 1:NL
+    y(i,1) = -1;
+end
 %% ================ Part 2: CHARGEMENT DES PARAMETRES ET CALCUL DES POIDS ================
-% In this part of the exercise, we load some pre-initialized 
-% neural network parameters.
 
-% fprintf('\nLoading Saved Neural Network Parameters ...\n')
-% 
-% % Load the weights into variables Theta1 and Theta2
-% load('ex4weights.mat');
-% 
-% % Unroll parameters 
-% nn_params = [Theta1(:) ; Theta2(:)];
+Wgauss = zeros(N);
+sigma = 1;
+
+for i = 1:N
+    for j = 1:N
+        Wgauss(i,j) = exp(sum((x(i,:)-x(j,:)).^2)/sigma^2);
+    end
+end
+
+for i = 1:N
+    Wgauss(i,i) = 1;
+end
+
 
 %% ================= Part 3: CALCUL ET TRI VECTEURS PROPRES ====================
 
+D = zeros(N);
+
+for i = 1:N
+    D(i,i) = sum(Wgauss(i,:));
+end
+
+
+L =(D-Wgauss);
+
+[V,Diag] = eig(L);
+
+vp = eig(L);
+
+vpsorted = sort(vp);
 
 
 %% ================= Part 4: CONSTRUCTION DE LA SOLUTION====================
+Ysol = V(:,1);
+k = 3 ;
+
+[idx,C] = kmeans(Ysol,k);
+
 
 
 %% =================== Part 5: MINIMISE FONCTION DE COUT ======================
